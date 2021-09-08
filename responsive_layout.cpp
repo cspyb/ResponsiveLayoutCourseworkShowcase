@@ -2,7 +2,7 @@
 // Created by twak on 07/10/2019.
 //
 
-// All functions in this file have been implemented by Fardin Fahim
+// Most of the functions in this file have been implemented by Fardin Fahim
 
 #include "responsive_layout.h"
 #include "responsive_label.h"
@@ -10,16 +10,16 @@
 
 using namespace std;
 
-
 void ResponsiveLayout::setGeometry(const QRect &r /* our layout should always fit inside r */ ) {
-
     QLayout::setGeometry(r);
 
+    // decide which configuration to use based on window size
     fullSizeConfig();
     if(r.width() <=640)
         thinPortraitConfig();
     if(r.height() <= 400)
         thinLandscapeConfig();
+        
     int adCount = 0;
     int searchResultCount = 0;
     // for all the Widgets added in ResponsiveWindow.cpp
@@ -48,6 +48,7 @@ void ResponsiveLayout::setGeometry(const QRect &r /* our layout should always fi
     }
 }
 
+// the three Config functions that follow will readjust the numbers for spacing, positioning and sizing based on 
 void ResponsiveLayout::fullSizeConfig(){
     cutRows = false;
     splitHeader = false;
@@ -60,12 +61,11 @@ void ResponsiveLayout::fullSizeConfig(){
     fixedChunkWidth = rowHeight;
     optionsHeight = rowHeight;
     adHeight = rowHeight;
-    homeLinkWidth = 2*fixedChunkWidth;
-    basketWidth = 2*fixedChunkWidth;
-    signInWidth = 2*fixedChunkWidth;
-    leftBorderSize = 2*fixedChunkWidth;
+    homeLinkWidth = 2 * fixedChunkWidth;
+    basketWidth = 2 * fixedChunkWidth;
+    signInWidth = 2 * fixedChunkWidth;
+    leftBorderSize = 2 * fixedChunkWidth;
     rightBorderSize = leftBorderSize;
-
 }
 
 void ResponsiveLayout::thinLandscapeConfig()
@@ -73,7 +73,7 @@ void ResponsiveLayout::thinLandscapeConfig()
     cutRows = true;
     headerSize = 75;
     rowHeight = 50;
-    searchHeight = 2.0/3.0 * rowHeight;
+    searchHeight = 2.0 / 3.0 * rowHeight;
     spacing = kSmallSpacing;
 }
 
@@ -85,7 +85,7 @@ void ResponsiveLayout::thinPortraitConfig()
     rightBorderSize = 0;
     basketWidth = fixedChunkWidth;
     signInWidth = fixedChunkWidth;
-    homeLinkWidth = 2*fixedChunkWidth;
+    homeLinkWidth = 2 * fixedChunkWidth;
 }
 
 int ResponsiveLayout::getBodyWidth(const QRect &r)
@@ -95,7 +95,7 @@ int ResponsiveLayout::getBodyWidth(const QRect &r)
 
 int ResponsiveLayout::getAdsAndSearchesStartY()
 {
-    return spacing + headerSize + searchHeight*2;
+    return spacing + headerSize + searchHeight * 2;
 }
 
 int ResponsiveLayout::getNavTabWidth(const QRect &r)
@@ -111,7 +111,7 @@ bool ResponsiveLayout::drawHeader(const QRect &r, ResponsiveLabel *label)
     }
     else if (label -> text() == kNavTabs ){ // headers go at the top
         label -> setGeometry(spacing + (splitHeader ? 0 : homeLinkWidth),
-                             spacing + (splitHeader ? 0.5*headerSize : 0),
+                             spacing + (splitHeader ? 0.5 * headerSize : 0),
                              getNavTabWidth(r) - spacing,
                              (splitHeader ? 0.5 : 1 ) * headerSize - spacing);
     }
@@ -122,29 +122,30 @@ bool ResponsiveLayout::drawHeader(const QRect &r, ResponsiveLabel *label)
     }
     else if (label -> text() == kShoppingBasket){
         label -> setGeometry(r.width() - basketWidth, spacing, basketWidth - spacing,
-                             (splitHeader ? 0.5 : 1)*headerSize - spacing);
+                             (splitHeader ? 0.5 : 1) * headerSize - spacing);
     }
     else{ // otherwise: disappear label by moving out of bounds
-        label -> setGeometry (-1,-1,0,0);
+        label -> setGeometry (-1, -1, 0, 0);
         return false;
     }
     return true;
 }
 
+// arrange the size and position of the labels based on their type
 void ResponsiveLayout::drawBody(const QRect &r, ResponsiveLabel *label, int& adCount, int& searchResultCount)
 {
     if (label -> text() == kSearchBackward){
-        label -> setGeometry(leftBorderSize + spacing, (spacing+headerSize),
+        label -> setGeometry(leftBorderSize + spacing, (spacing + headerSize),
                              fixedChunkWidth - spacing, searchHeight - spacing);
     }
     else if (label -> text() == kSearchForward){
         label->setGeometry(spacing + leftBorderSize + fixedChunkWidth,
-                           (spacing+headerSize), fixedChunkWidth - spacing,
+                           (spacing + headerSize), fixedChunkWidth - spacing,
                            searchHeight - spacing);
     }
     else if (label -> text() == kSearchOptions){
-        label -> setGeometry(spacing + leftBorderSize + 2*fixedChunkWidth, spacing+headerSize,
-                             getBodyWidth(r) - 2*fixedChunkWidth - spacing, searchHeight-spacing);
+        label -> setGeometry(spacing + leftBorderSize + 2 * fixedChunkWidth, spacing + headerSize,
+                             getBodyWidth(r) - 2 * fixedChunkWidth - spacing, searchHeight-spacing);
     }
     else if (label -> text() == kSearchText){
         label -> setGeometry(spacing + leftBorderSize, spacing + headerSize + searchHeight,
@@ -158,31 +159,28 @@ void ResponsiveLayout::drawBody(const QRect &r, ResponsiveLabel *label, int& adC
     else if (label -> text() == kAdvert){
         if(!cutRows){
              label -> setGeometry(leftBorderSize + spacing,
-                                 getAdsAndSearchesStartY() + adCount*(adHeight),
-                                 getBodyWidth(r) - spacing, adHeight-spacing);
+                                 getAdsAndSearchesStartY() + adCount * (adHeight),
+                                 getBodyWidth(r) - spacing, adHeight - spacing);
             adCount++;
         }
         else
-            label -> setGeometry(-1,-1,0,0);
+            label -> setGeometry(-1, -1, 0, 0);
 
     }
     else if (label -> text() == kSearchResult){
-        if(getAdsAndSearchesStartY() + adCount*adHeight
-           + (searchResultCount+1)*(rowHeight) > r.height())
-            label->setGeometry(-1,-1,0,0);
+        if(getAdsAndSearchesStartY() + adCount * adHeight
+           + (searchResultCount+1) * (rowHeight) > r.height())
+            label->setGeometry(-1, -1, 0, 0);
         else
             label -> setGeometry(leftBorderSize + spacing,
-                                 getAdsAndSearchesStartY() + adCount*adHeight
-                                 + searchResultCount*(rowHeight),
+                                 getAdsAndSearchesStartY() + adCount * adHeight
+                                 + searchResultCount * (rowHeight),
                                  getBodyWidth(r) - spacing, rowHeight - spacing);
         searchResultCount++;
     }
     else // otherwise: disappear label by moving out of bounds
-        label -> setGeometry (-1,-1,0,0);
+        label -> setGeometry (-1, -1, 0, 0 );
 }
-
-
-
 
 // following methods provide a trivial list-based implementation of the QLayout class
 int ResponsiveLayout::count() const {
@@ -196,8 +194,6 @@ QLayoutItem *ResponsiveLayout::itemAt(int idx) const {
 QLayoutItem *ResponsiveLayout::takeAt(int idx) {
     return idx >= 0 && idx < list_.size() ? list_.takeAt(idx) : 0;
 }
-
-
 
 void ResponsiveLayout::addItem(QLayoutItem *item) {
     list_.append(item);
